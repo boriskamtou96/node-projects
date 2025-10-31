@@ -41,15 +41,21 @@ async function getAllUsers() {
   return users;
 }
 
+async function getCurrentUser() {
+  const result = await getAllUsers();
+  return result.find((user) => user.id == currentUserId);
+}
+
 app.get('/', async (req, res) => {
   const countries = await checkVisisted(currentUserId);
   const users = await getAllUsers();
+  const currentUser = await getCurrentUser();
 
   res.render('index.ejs', {
     countries: countries,
     total: countries.length,
     users: users,
-    color: 'teal',
+    color: currentUser.color,
   });
 });
 
@@ -71,7 +77,7 @@ app.post('/add', async (req, res) => {
       );
       res.redirect('/');
     } catch (err) {
-      console.log(err);
+      console.log('Country not found');
       res.redirect('/');
     }
   } catch (err) {
@@ -98,13 +104,14 @@ app.post('/new', async (req, res) => {
   console.log(`Body: ${name} ${color}`);
 
   const result = await db.query(
-    'INSERT INTO users (name, color) VALUES ($1, $2) RETURNING name',
+    'INSERT INTO users (name, color) VALUES ($1, $2) RETURNING *',
     [name, color]
   );
 
-  const createdUserName = result.rows[0].name;
+  const id = result.rows[0].id;
+  currentUserId = id;
 
-  console.log(`Created user name: ${createdUserName}`);
+  console.log(`Created user name: ${currentUserId}`);
 
   res.redirect('/');
 });
