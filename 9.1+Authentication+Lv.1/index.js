@@ -76,11 +76,18 @@ app.post('/login', async (req, res) => {
 
     if (checkResult.rows.length > 0) {
       const userPassword = checkResult.rows[0].password;
-      if (password === userPassword) {
-        res.render('secrets.ejs');
-      } else {
-        res.send('Wrong password');
-      }
+
+      bcrypt.compare(password, userPassword, async (err, result) => {
+        if (err) {
+          res.send('Error retreiving password');
+        } else {
+          if (result) {
+            res.render('secrets.ejs');
+          } else {
+            res.send('Wrong password');
+          }
+        }
+      });
     } else {
       res.send('User not found. Try register');
     }
