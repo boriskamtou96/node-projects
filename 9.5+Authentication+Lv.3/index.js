@@ -64,7 +64,7 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-  req.logout(function (err) {
+  req.logout((err) => {
     if (err) {
       return next(err);
     }
